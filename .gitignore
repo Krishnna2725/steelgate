@@ -1,0 +1,13 @@
+node_modules/
+release/
+release-final/
+dist/
+*.log
+steelgate vibecoding conversation.txt
+钢门MVP产品需求文档.md
+.env
+.env.*
+*.pfx
+*.p12
+*.pem
+*.key

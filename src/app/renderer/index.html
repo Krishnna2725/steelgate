@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>钢门 HUD</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="hud">
+    <!-- Icon container -->
+    <div id="icon-area">
+      <img id="main-icon" src="../../../assets/icon.png" alt="" draggable="false">
+      <div id="icon-ghost"></div>
+      <div id="layer-badge">0</div>
+    </div>
+
+    <!-- Right side: orb + health bar -->
+    <div id="info-area">
+      <div id="orb"></div>
+      <div id="health-bar-container">
+        <div id="health-bar">
+          <div id="health-bar-fill"></div>
+          <div id="health-bar-segments"></div>
+        </div>
+        <div id="hp-tooltip">当前血量：1000 HP</div>
+      </div>
+    </div>
+
+    <!-- Jump text container -->
+    <div id="jump-container"></div>
+  </div>
+
+  <script src="hud.js"></script>
+</body>
+</html>

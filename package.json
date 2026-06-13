@@ -1,0 +1,56 @@
+{
+  "name": "steelgate",
+  "version": "0.1.1",
+  "author": "Krishnna2725",
+  "description": "SteelGate - a local gamified HUD for Claude Code and Codex",
+  "main": "src/app/main.js",
+  "bin": {
+    "steelgate": "./bin/steelgate.js"
+  },
+  "scripts": {
+    "start": "electron src/app/main.js",
+    "build": "electron-builder --win nsis",
+    "build:dir": "electron-builder --dir",
+    "test": "node --test test/steelgate.test.js",
+    "test:gain": "node -e \"const s=require('./src/shared/steel-gain'); [59,60,70,100,200,300,400].forEach(c => console.log(c + ' chars:', JSON.stringify(s.calculateSteelGain(c))))\"",
+    "test:hook": "node test/hook-smoke.js"
+  },
+  "keywords": [
+    "claude-code",
+    "codex",
+    "gamification",
+    "desktop-hud"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "devDependencies": {
+    "electron": "41.7.1",
+    "electron-builder": "26.0.12"
+  },
+  "build": {
+    "appId": "com.steelgate.desktop",
+    "productName": "SteelGate",
+    "asar": true,
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "LICENSE",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release-final"
+    },
+    "artifactName": "SteelGate-${version}-${arch}-Setup.${ext}",
+    "win": {
+      "icon": "assets/icon.png",
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "runAfterFinish": true,
+      "include": "build/installer.nsh"
+    }
+  }
+}
