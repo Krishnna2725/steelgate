@@ -58,6 +58,22 @@ SteelGate 是给 Claude Code 和 Codex 用户整的本地桌面小玩具。
 
 安装包没有花钱买代码签名，Windows 可能会弹出“未知发布者”或 SmartScreen 提示。心里没底就先看源码、自己构建，别硬点，我们不劝人裸装。
 
+## 它平时怎么活着？
+
+SteelGate **不需要开机自启，也不会没事一直蹲在后台吃灰**。
+
+安装时，它会给 Claude Code 和 Codex 装上 Hook。平时 SteelGate 可以完全退出；当你提交达到触发门槛的长 prompt 时，Hook 会把它叫醒，HUD 出来“铛”一下，然后继续等你叠钢。
+
+默认情况下：
+
+- 30 分钟没有触发：HUD 自动隐藏，但后台还在
+- 60 分钟没有触发：SteelGate 自动退出，彻底歇着
+- 下次再提交长 prompt：Hook 自动重新启动 SteelGate，HUD 满血复活
+
+所以开机后不用手动启动，也不用往开机启动项里塞东西。你负责写逆天需求，Hook 负责踹门。
+
+自动隐藏和退出时间都可以在 `~/.steelgate/config.json` 里修改。
+
 ## 从源码开钢
 
 需要 Node.js 20 或更高版本。
