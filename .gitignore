@@ -1,6 +1,7 @@
 node_modules/
 release/
 release-final/
+release-*/
 dist/
 *.log
 steelgate vibecoding conversation.txt

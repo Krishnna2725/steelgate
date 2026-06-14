@@ -2,6 +2,7 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const { DEFAULT_CONFIG } = require('./config')
+const { removeLegacyAutostart } = require('./legacy-cleanup')
 
 const STEEL_HOME = path.join(os.homedir(), '.steelgate')
 const CLAUDE_SETTINGS = path.join(os.homedir(), '.claude', 'settings.json')
@@ -16,6 +17,7 @@ function buildRuntimeOptions({ appRoot, desktopExecutable, isPackaged }) {
 }
 
 function installRuntime({ appRoot, desktopExecutable, desktopArgs = [] }) {
+  removeLegacyAutostart()
   ensureDir(STEEL_HOME)
   ensureDir(path.join(STEEL_HOME, 'hooks'))
   ensureDir(path.join(STEEL_HOME, 'logs'))
@@ -47,6 +49,7 @@ function installRuntime({ appRoot, desktopExecutable, desktopArgs = [] }) {
 }
 
 function uninstallRuntime() {
+  removeLegacyAutostart()
   removeHookFromFile(CLAUDE_SETTINGS)
   removeHookFromFile(CODEX_HOOKS)
 }

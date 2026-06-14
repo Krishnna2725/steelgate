@@ -4,6 +4,7 @@ const path = require('node:path')
 const { calculateSteelGain } = require('../src/shared/steel-gain')
 const { normalizeSteelEvent } = require('../src/shared/steel-event')
 const { buildRuntimeOptions } = require('../src/shared/runtime-install')
+const { removeLegacyAutostart } = require('../src/shared/legacy-cleanup')
 
 test('steel gain follows the MVP thresholds and cap', () => {
   assert.equal(calculateSteelGain(59).triggered, false)
@@ -55,4 +56,23 @@ test('development runtime launches the app entry from the project root', () => {
 
   assert.deepEqual(options.desktopArgs, [path.join(appRoot, 'src', 'app', 'main.js')])
   assert.equal(options.desktopArgs[0].includes(path.join('src', 'app', 'src', 'app')), false)
+})
+
+test('legacy autostart cleanup removes the old Windows Run value', () => {
+  const calls = []
+  const removed = removeLegacyAutostart({
+    platform: 'win32',
+    execFile: (...args) => calls.push(args),
+  })
+
+  assert.equal(removed, true)
+  assert.deepEqual(calls[0][0], 'reg.exe')
+  assert.deepEqual(calls[0][1], [
+    'delete',
+    'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run',
+    '/v',
+    'SteelGate',
+    '/f',
+  ])
+  assert.equal(removeLegacyAutostart({ platform: 'linux' }), false)
 })

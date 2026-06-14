@@ -2,6 +2,7 @@
 const path = require('path')
 const fs = require('fs')
 const os = require('os')
+const { removeLegacyAutostart } = require('../shared/legacy-cleanup')
 
 // Resolve paths relative to this script
 const SCRIPT_DIR = path.join(__dirname, '..')  // src/
@@ -75,6 +76,7 @@ function printUsage() {
 
 function doInstall() {
   console.log('正在安装钢门...')
+  const removedLegacyAutostart = removeLegacyAutostart()
 
   // 1. Create directories
   ensureDir(STEEL_HOME)
@@ -116,6 +118,7 @@ function doInstall() {
   console.log(`  数据目录：${STEEL_HOME}`)
   console.log(`  Claude Code Hook：${claudeOk ? '已启用' : '安装失败'}`)
   console.log(`  Codex Hook：${codexOk ? '已启用' : '安装失败'}`)
+  if (removedLegacyAutostart) console.log('  旧版开机自启：已清理')
   console.log('')
   console.log('本工具只统计字数、层数和血量，不保存 prompt 原文。')
   console.log('第一次有效叠钢时会自动唤起桌面 HUD。')
@@ -226,6 +229,7 @@ function mergeCodexHooks() {
 
 function doUninstall() {
   console.log('正在卸载钢门...')
+  const removedLegacyAutostart = removeLegacyAutostart()
 
   // Remove Claude Code hooks
   try {
@@ -261,6 +265,7 @@ function doUninstall() {
 
   console.log('')
   console.log('钢门已卸载。')
+  if (removedLegacyAutostart) console.log('旧版开机自启已清理。')
   console.log(`本地数据保留在：${STEEL_HOME}`)
   console.log('如需删除数据，请手动删除该目录。')
 }
@@ -295,6 +300,12 @@ function doStatus() {
     }
   } catch (_) {}
 
+  const configPath = path.join(STEEL_HOME, 'config.json')
+  const config = readJson(configPath) || {}
+  const executableOk = typeof config.desktopExecutable === 'string' && fs.existsSync(config.desktopExecutable)
+  const firstArg = Array.isArray(config.desktopArgs) ? config.desktopArgs[0] : null
+  const entryOk = !firstArg || !path.isAbsolute(firstArg) || fs.existsSync(firstArg)
+
   // Read stats
   let stats = null
   try {
@@ -313,6 +324,7 @@ function doStatus() {
   console.log('─'.repeat(40))
   console.log(`  Claude Code Hook: ${claudeHook}`)
   console.log(`  Codex Hook:       ${codexHook}`)
+  console.log(`  HUD 启动命令:     ${executableOk && entryOk ? '可用' : '失效，请重新安装 Hook'}`)
   console.log(`  数据目录:         ${fs.existsSync(STEEL_HOME) ? '已安装' : '未找到'}`)
   console.log('─'.repeat(40))
 
@@ -422,6 +434,14 @@ function writeJsonAtomic(filePath, data) {
   const tmpPath = filePath + '.tmp'
   fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), 'utf8')
   fs.renameSync(tmpPath, filePath)
+}
+
+function readJson(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'))
+  } catch (_) {
+    return null
+  }
 }
 
 main()

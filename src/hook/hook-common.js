@@ -1,5 +1,7 @@
 const http = require('http')
 const { spawn } = require('child_process')
+const fs = require('fs')
+const path = require('path')
 const { STEEL_PORT } = require('../shared/config')
 const { calculateSteelGain } = require('../shared/steel-gain')
 const { writePendingEvent, ensureTodayStats, getLocalDateString } = require('../shared/data')
@@ -80,6 +82,14 @@ function launchHud() {
     log('HUD launch configuration is missing; reinstall SteelGate')
     return false
   }
+  if (!fs.existsSync(executable)) {
+    log(`HUD executable does not exist: ${executable}`)
+    return false
+  }
+  if (args[0] && path.isAbsolute(args[0]) && !fs.existsSync(args[0])) {
+    log(`HUD entry does not exist: ${args[0]}`)
+    return false
+  }
 
   try {
     const child = spawn(executable, args, {
@@ -87,6 +97,7 @@ function launchHud() {
       stdio: 'ignore',
       windowsHide: true,
     })
+    child.once('error', err => log(`Failed to launch HUD: ${err.message}`))
     child.unref()
     return true
   } catch (err) {
