@@ -7,6 +7,7 @@ const { calculateSteelGain } = require('../shared/steel-gain')
 const { writePendingEvent, ensureTodayStats, getLocalDateString } = require('../shared/data')
 const { STEEL_CONFIG } = require('../shared/config')
 const { log } = require('../shared/logger')
+const { claimCodexPrompt } = require('./codex-prompt')
 
 function runHook(source) {
   let data = ''
@@ -33,7 +34,12 @@ function processInput(rawData, source) {
     process.exit(0)
   }
 
-  const prompt = input.prompt || ''
+  if (!isAcceptedPromptInput(input, source)) {
+    log(`Ignored non-interactive ${source} hook input: ${summarizeHookInput(input)}`)
+    process.exit(0)
+  }
+
+  const prompt = input.prompt
   const chars = prompt.length
 
   const result = calculateSteelGain(chars)
@@ -55,6 +61,23 @@ function processInput(rawData, source) {
   }
 
   deliverEvent(event)
+}
+
+function isAcceptedPromptInput(input, source) {
+  if (!input || typeof input.prompt !== 'string') return false
+  if (source !== 'codex') return true
+  return claimCodexPrompt(input)
+}
+
+function summarizeHookInput(input) {
+  if (!input || typeof input !== 'object') return 'not-an-object'
+  return JSON.stringify({
+    hookEventName: input.hook_event_name || null,
+    hasSessionId: typeof input.session_id === 'string' && input.session_id.length > 0,
+    hasTurnId: typeof input.turn_id === 'string' && input.turn_id.length > 0,
+    hasTranscriptPath: typeof input.transcript_path === 'string' && input.transcript_path.length > 0,
+    promptChars: typeof input.prompt === 'string' ? input.prompt.length : null,
+  })
 }
 
 async function deliverEvent(event) {
@@ -145,4 +168,4 @@ function sendToHud(event) {
   })
 }
 
-module.exports = { runHook, processInput, sendToHud, launchHud }
+module.exports = { runHook, processInput, isAcceptedPromptInput, summarizeHookInput, sendToHud, launchHud }

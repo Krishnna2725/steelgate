@@ -26,7 +26,7 @@ function installRuntime({ appRoot, desktopExecutable, desktopArgs = [] }) {
   copyFile(path.join(appRoot, 'assets', 'icon.png'), path.join(STEEL_HOME, 'assets', 'icon.png'))
   copyFile(path.join(appRoot, 'assets', 'sounds', 'trigger.mp3'), path.join(STEEL_HOME, 'assets', 'sounds', 'trigger.mp3'))
 
-  for (const name of ['claude-hook.js', 'codex-hook.js', 'hook-common.js']) {
+  for (const name of ['claude-hook.js', 'codex-hook.js', 'hook-common.js', 'codex-prompt.js']) {
     copyFile(path.join(appRoot, 'src', 'hook', name), path.join(STEEL_HOME, 'hooks', name))
   }
   copyDir(path.join(appRoot, 'src', 'shared'), path.join(STEEL_HOME, 'shared'))

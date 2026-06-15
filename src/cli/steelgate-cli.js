@@ -100,6 +100,7 @@ function doInstall() {
 
   // 4. Also copy hook-common.js (shared dependency)
   installHookScript('hook-common.js')
+  installHookScript('codex-prompt.js')
 
   // 5. Copy shared modules
   copyDirSync(path.join(SCRIPT_DIR, 'shared'), path.join(STEEL_HOME, 'shared'))
