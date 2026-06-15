@@ -1,6 +1,6 @@
 {
   "name": "steelgate",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "Krishnna2725",
   "description": "SteelGate - a local gamified HUD for Claude Code and Codex",
   "main": "src/app/main.js",

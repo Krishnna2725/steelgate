@@ -7,7 +7,6 @@ const { calculateSteelGain } = require('../shared/steel-gain')
 const { writePendingEvent, ensureTodayStats, getLocalDateString } = require('../shared/data')
 const { STEEL_CONFIG } = require('../shared/config')
 const { log } = require('../shared/logger')
-const { claimCodexPrompt } = require('./codex-prompt')
 
 function runHook(source) {
   let data = ''
@@ -34,7 +33,7 @@ function processInput(rawData, source) {
     process.exit(0)
   }
 
-  if (!isAcceptedPromptInput(input, source)) {
+  if (!isAcceptedPromptInput(input)) {
     log(`Ignored non-interactive ${source} hook input: ${summarizeHookInput(input)}`)
     process.exit(0)
   }
@@ -63,10 +62,8 @@ function processInput(rawData, source) {
   deliverEvent(event)
 }
 
-function isAcceptedPromptInput(input, source) {
-  if (!input || typeof input.prompt !== 'string') return false
-  if (source !== 'codex') return true
-  return claimCodexPrompt(input)
+function isAcceptedPromptInput(input) {
+  return Boolean(input && typeof input.prompt === 'string')
 }
 
 function summarizeHookInput(input) {

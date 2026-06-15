@@ -6,7 +6,6 @@ const { normalizeSteelEvent } = require('../src/shared/steel-event')
 const { buildRuntimeOptions } = require('../src/shared/runtime-install')
 const { removeLegacyAutostart } = require('../src/shared/legacy-cleanup')
 const { isAcceptedPromptInput, summarizeHookInput } = require('../src/hook/hook-common')
-const { countOccurrences, isStandardUserPrompt, normalizePrompt } = require('../src/hook/codex-prompt')
 
 test('steel gain follows the MVP thresholds and cap', () => {
   assert.equal(calculateSteelGain(59).triggered, false)
@@ -79,33 +78,11 @@ test('legacy autostart cleanup removes the old Windows Run value', () => {
   assert.equal(removeLegacyAutostart({ platform: 'linux' }), false)
 })
 
-test('Codex recognizes standard interactive UserPromptSubmit payloads', () => {
+test('prompt hooks are accepted immediately without waiting for prompt history', () => {
   const prompt = 'a'.repeat(80)
-  const interactive = {
-    hook_event_name: 'UserPromptSubmit',
-    session_id: 'session-1',
-    turn_id: 'turn-1',
-    transcript_path: 'C:\\temp\\transcript.jsonl',
-    prompt,
-  }
-
-  assert.equal(isStandardUserPrompt(interactive), true)
-  assert.equal(isStandardUserPrompt({ prompt }), false)
-  assert.equal(isStandardUserPrompt({ ...interactive, hook_event_name: 'SessionStart' }), false)
-  assert.equal(isAcceptedPromptInput({ prompt }, 'claude-code'), true)
-})
-
-test('Codex prompt history distinguishes user submissions from background prompts', () => {
-  const history = {
-    threadA: ['first prompt', 'same prompt'],
-    threadB: ['same prompt', 'latest user prompt'],
-    global: [],
-  }
-
-  assert.equal(countOccurrences(history, 'same prompt'), 2)
-  assert.equal(countOccurrences(history, 'latest user prompt\n'), 1)
-  assert.equal(countOccurrences(history, 'background startup prompt'), 0)
-  assert.equal(normalizePrompt('hello\r\n'), 'hello')
+  assert.equal(isAcceptedPromptInput({ prompt }), true)
+  assert.equal(isAcceptedPromptInput({ prompt: '' }), true)
+  assert.equal(isAcceptedPromptInput({}), false)
 })
 
 test('ignored hook diagnostics never include prompt text', () => {
