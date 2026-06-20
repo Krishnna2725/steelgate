@@ -10,7 +10,7 @@ const DEFAULT_CONFIG = {
 
   minTriggerChars: 60,
   charsPerLayer: 10,
-  hpPerLayer: 50,
+  hpPerLayer: 10,
   maxLayersPerTrigger: 30,
 
   hpPerSegment: 500,

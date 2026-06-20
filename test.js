@@ -44,48 +44,48 @@ function ping() {
 
 const SCENARIOS = [
   {
-    name: '小叠钢 (+6层 / 300 HP)',
+    name: '小叠钢 (+6层 / 60 HP)',
     desc: '60字 prompt，最低触发',
-    event: { source: 'test', chars: 60, layers: 6, gainHp: 300, intensity: 0.2, capped: false },
+    event: { source: 'test', chars: 60, layers: 6, gainHp: 60, intensity: 0.2, capped: false },
   },
   {
-    name: '中叠钢 (+15层 / 750 HP)',
+    name: '中叠钢 (+15层 / 150 HP)',
     desc: '150字 prompt，中等强度',
-    event: { source: 'test', chars: 150, layers: 15, gainHp: 750, intensity: 0.5, capped: false },
+    event: { source: 'test', chars: 150, layers: 15, gainHp: 150, intensity: 0.5, capped: false },
   },
   {
-    name: '大叠钢 (+25层 / 1250 HP)',
+    name: '大叠钢 (+25层 / 250 HP)',
     desc: '250字 prompt，高强度',
-    event: { source: 'test', chars: 250, layers: 25, gainHp: 1250, intensity: 0.83, capped: false },
+    event: { source: 'test', chars: 250, layers: 25, gainHp: 250, intensity: 0.83, capped: false },
   },
   {
-    name: '封顶叠钢 (+30层 / 1500 HP)',
+    name: '封顶叠钢 (+30层 / 300 HP)',
     desc: '400字 prompt，触发上限',
-    event: { source: 'test', chars: 400, layers: 30, gainHp: 1500, intensity: 1.0, capped: true },
+    event: { source: 'test', chars: 400, layers: 30, gainHp: 300, intensity: 1.0, capped: true },
   },
   {
-    name: '超级封顶 (+30层 / 1500 HP)',
+    name: '超级封顶 (+30层 / 300 HP)',
     desc: '600字 prompt，超长封顶',
-    event: { source: 'test', chars: 600, layers: 30, gainHp: 1500, intensity: 1.0, capped: true },
+    event: { source: 'test', chars: 600, layers: 30, gainHp: 300, intensity: 1.0, capped: true },
   },
   {
     name: '连击 x5',
     desc: '快速连续触发 5 次中等叠钢',
-    event: { source: 'test', chars: 150, layers: 15, gainHp: 750, intensity: 0.5, capped: false },
+    event: { source: 'test', chars: 150, layers: 15, gainHp: 150, intensity: 0.5, capped: false },
     repeat: 5,
     delay: 300,
   },
   {
     name: '连击 x10',
     desc: '快速连续触发 10 次小叠钢',
-    event: { source: 'test', chars: 80, layers: 8, gainHp: 400, intensity: 0.27, capped: false },
+    event: { source: 'test', chars: 80, layers: 8, gainHp: 80, intensity: 0.27, capped: false },
     repeat: 10,
     delay: 200,
   },
   {
     name: 'Codex 来源测试',
     desc: '模拟 Codex 触发',
-    event: { source: 'codex', chars: 200, layers: 20, gainHp: 1000, intensity: 0.67, capped: false },
+    event: { source: 'codex', chars: 200, layers: 20, gainHp: 200, intensity: 0.67, capped: false },
   },
 ]
 

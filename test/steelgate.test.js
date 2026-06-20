@@ -12,14 +12,14 @@ test('steel gain follows the MVP thresholds and cap', () => {
   assert.deepEqual(calculateSteelGain(60), {
     triggered: true,
     layers: 6,
-    gainHp: 300,
+    gainHp: 60,
     intensity: 0.2,
     capped: false,
   })
   assert.deepEqual(calculateSteelGain(400), {
     triggered: true,
     layers: 30,
-    gainHp: 1500,
+    gainHp: 300,
     intensity: 1,
     capped: true,
   })
@@ -36,7 +36,7 @@ test('event normalization derives values and drops prompt text', () => {
   })
 
   assert.equal(event.layers, 8)
-  assert.equal(event.gainHp, 400)
+  assert.equal(event.gainHp, 80)
   assert.equal(event.intensity, 8 / 30)
   assert.equal(Object.hasOwn(event, 'prompt'), false)
 })
