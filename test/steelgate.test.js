@@ -6,6 +6,9 @@ const { normalizeSteelEvent } = require('../src/shared/steel-event')
 const { buildRuntimeOptions } = require('../src/shared/runtime-install')
 const { removeLegacyAutostart } = require('../src/shared/legacy-cleanup')
 const { isAcceptedPromptInput, summarizeHookInput } = require('../src/hook/hook-common')
+const { readLifecycleState, setHookLaunchEnabled, isHookLaunchEnabled } = require('../src/shared/lifecycle-state')
+const os = require('node:os')
+const fs = require('node:fs')
 
 test('steel gain follows the MVP thresholds and cap', () => {
   assert.equal(calculateSteelGain(59).triggered, false)
@@ -93,4 +96,15 @@ test('ignored hook diagnostics never include prompt text', () => {
 
   assert.equal(summary.includes('private prompt text'), false)
   assert.equal(summary.includes('"promptChars":19'), true)
+})
+
+test('manual quit state blocks hook launch until manual restart', () => {
+  const stateFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'steelgate-')), 'lifecycle.json')
+
+  assert.equal(isHookLaunchEnabled(stateFile), true)
+  setHookLaunchEnabled(false, stateFile)
+  assert.equal(isHookLaunchEnabled(stateFile), false)
+  assert.equal(readLifecycleState(stateFile).hookLaunchEnabled, false)
+  setHookLaunchEnabled(true, stateFile)
+  assert.equal(isHookLaunchEnabled(stateFile), true)
 })

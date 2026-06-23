@@ -7,6 +7,7 @@ const { applySteelEvent, readPendingEvents, clearPendingEvents, ensureTodayStats
 const { normalizeSteelEvent } = require('../shared/steel-event')
 const { log } = require('../shared/logger')
 const { buildRuntimeOptions, installRuntime, uninstallRuntime } = require('../shared/runtime-install')
+const { isHookLaunchEnabled, setHookLaunchEnabled } = require('../shared/lifecycle-state')
 
 let mainWindow = null
 let tray = null
@@ -16,12 +17,16 @@ let quitTimer = null
 let currentPort = STEEL_PORT
 let currentScale = 1.0
 let rendererReady = false
+let explicitQuit = false
 const rendererEventQueue = []
 
 const HIDE_TIMEOUT = STEEL_CONFIG.autoHideMs || 1800000
 const QUIT_TIMEOUT = STEEL_CONFIG.autoExitMs || 3600000
 const SCALE_OPTIONS = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
 const STATE_FILE = path.join(PATHS.home, 'ui-state.json')
+const IS_HOOK_LAUNCH = process.argv.includes('--hook-launch')
+const IS_AUTO_START = process.argv.includes('--autostart')
+const IS_MANUAL_LAUNCH = !IS_HOOK_LAUNCH && !IS_AUTO_START
 
 const BASE_W = Math.max(300, STEEL_CONFIG.healthBarWidth + 100)
 const BASE_H = 130
@@ -135,6 +140,15 @@ function startServer() {
       return
     }
 
+    if (req.method === 'POST' && req.url === '/api/show') {
+      ensureTodayStats()
+      showWindow()
+      resetTimers()
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ ok: true }))
+      return
+    }
+
     if (req.method === 'POST' && req.url === '/api/steel-event') {
       if (!String(req.headers['content-type'] || '').startsWith('application/json')) {
         res.writeHead(415); res.end('JSON required')
@@ -163,7 +177,10 @@ function startServer() {
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
       tryPingExisting(currentPort, (alive) => {
-        if (alive) app.quit()
+        if (alive) {
+          if (IS_MANUAL_LAUNCH) requestExistingHud().finally(() => app.quit())
+          else app.quit()
+        }
         else if (currentPort < STEEL_PORT + 5) { currentPort++; server.listen(currentPort, '127.0.0.1') }
         else app.quit()
       })
@@ -174,6 +191,30 @@ function startServer() {
     log(`HTTP server on 127.0.0.1:${currentPort}`)
     drainPendingEvents()
     resetTimers()
+  })
+}
+
+function requestExistingHud() {
+  return new Promise(resolve => {
+    let settled = false
+    const finish = () => {
+      if (settled) return
+      settled = true
+      resolve()
+    }
+    const req = http.request({
+      hostname: '127.0.0.1',
+      port: STEEL_PORT,
+      path: '/api/show',
+      method: 'POST',
+      timeout: 1000,
+    }, (res) => {
+      res.resume()
+      res.on('end', finish)
+    })
+    req.on('error', finish)
+    req.on('timeout', () => { req.destroy(); finish() })
+    req.end()
   })
 }
 
@@ -231,14 +272,48 @@ function buildContextMenu() {
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Show HUD', click: () => { ensureTodayStats(); showWindow(); resetTimers() } },
     { label: 'Hide HUD', click: () => { hideWindow() } },
+    {
+      label: '开机自动启动',
+      type: 'checkbox',
+      checked: isStartAtLoginEnabled(),
+      click: (item) => setStartAtLogin(item.checked),
+    },
     { label: 'Scale', submenu: scaleSubmenu },
     { label: 'Reset Today', click: () => {
       require('../shared/data').resetToday()
       if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('stats-reset')
     }},
     { type: 'separator' },
-    { label: 'Quit SteelGate', click: () => app.quit() },
+    {
+      label: '退出并暂停自动唤醒',
+      click: () => {
+        explicitQuit = true
+        setHookLaunchEnabled(false)
+        app.quit()
+      },
+    },
   ]))
+}
+
+function getLoginItemSettingsOptions() {
+  return {
+    path: process.execPath,
+    args: ['--autostart'],
+  }
+}
+
+function isStartAtLoginEnabled() {
+  if (!app.isPackaged) return false
+  return app.getLoginItemSettings(getLoginItemSettingsOptions()).openAtLogin
+}
+
+function setStartAtLogin(enabled) {
+  if (!app.isPackaged) return
+  app.setLoginItemSettings({
+    ...getLoginItemSettingsOptions(),
+    openAtLogin: enabled === true,
+  })
+  buildContextMenu()
 }
 
 function createTray() {
@@ -286,10 +361,24 @@ app.whenReady().then(() => {
     app.quit()
     return
   }
+
+
+  if ((IS_HOOK_LAUNCH || IS_AUTO_START) && !isHookLaunchEnabled()) {
+    app.quit()
+    return
+  }
+  if (IS_MANUAL_LAUNCH) setHookLaunchEnabled(true)
+
   resetSessionStats()
   createWindow()
   createTray()
   startServer()
+  if (IS_MANUAL_LAUNCH) {
+    mainWindow.once('ready-to-show', () => {
+      showWindow()
+      resetTimers()
+    })
+  }
   setTimeout(() => { resetTimers() }, 1000)
 })
 
@@ -297,5 +386,6 @@ app.on('window-all-closed', () => {})
 app.on('before-quit', () => {
   if (hideTimer) clearTimeout(hideTimer)
   if (quitTimer) clearTimeout(quitTimer)
-  if (server) server.close()
+  if (server && server.listening) server.close()
+  if (explicitQuit) log('Manual quit paused hook auto-launch')
 })

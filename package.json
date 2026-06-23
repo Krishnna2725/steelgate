@@ -1,6 +1,6 @@
 {
   "name": "steelgate",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "author": "Krishnna2725",
   "description": "SteelGate - a local gamified HUD for Claude Code and Codex",
   "main": "src/app/main.js",
@@ -24,7 +24,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
     "electron": "41.7.1",
-    "electron-builder": "26.0.12"
+    "electron-builder": "26.6.0"
   },
   "build": {
     "appId": "com.steelgate.desktop",
@@ -49,6 +49,9 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SteelGate",
       "runAfterFinish": true,
       "include": "build/installer.nsh"
     }

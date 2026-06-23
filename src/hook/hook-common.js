@@ -7,6 +7,7 @@ const { calculateSteelGain } = require('../shared/steel-gain')
 const { writePendingEvent, ensureTodayStats, getLocalDateString } = require('../shared/data')
 const { STEEL_CONFIG } = require('../shared/config')
 const { log } = require('../shared/logger')
+const { isHookLaunchEnabled } = require('../shared/lifecycle-state')
 
 function runHook(source) {
   let data = ''
@@ -82,6 +83,11 @@ async function deliverEvent(event) {
     process.exit(0)
   }
 
+  if (!isHookLaunchEnabled()) {
+    log('HUD auto-launch is paused; ignored steel event')
+    process.exit(0)
+  }
+
   launchHud()
 
   for (const delay of [300, 700, 1200]) {
@@ -97,7 +103,7 @@ async function deliverEvent(event) {
 
 function launchHud() {
   const executable = STEEL_CONFIG.desktopExecutable
-  const args = Array.isArray(STEEL_CONFIG.desktopArgs) ? STEEL_CONFIG.desktopArgs : []
+  const args = Array.isArray(STEEL_CONFIG.desktopArgs) ? [...STEEL_CONFIG.desktopArgs, '--hook-launch'] : ['--hook-launch']
   if (!executable) {
     log('HUD launch configuration is missing; reinstall SteelGate')
     return false
