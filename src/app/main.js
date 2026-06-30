@@ -304,16 +304,25 @@ function getLoginItemSettingsOptions() {
 
 function isStartAtLoginEnabled() {
   if (!app.isPackaged) return false
-  return app.getLoginItemSettings(getLoginItemSettingsOptions()).openAtLogin
+  const settings = app.getLoginItemSettings(getLoginItemSettingsOptions())
+  return settings.openAtLogin
 }
 
 function setStartAtLogin(enabled) {
-  if (!app.isPackaged) return
   app.setLoginItemSettings({
     ...getLoginItemSettingsOptions(),
     openAtLogin: enabled === true,
   })
   buildContextMenu()
+}
+
+function ensureAutostartPath() {
+  if (!app.isPackaged) return
+  const settings = app.getLoginItemSettings(getLoginItemSettingsOptions())
+  if (settings.openAtLogin && settings.path !== process.execPath) {
+    log(`Autostart path mismatch: ${settings.path} → ${process.execPath}, re-registering`)
+    setStartAtLogin(true)
+  }
 }
 
 function createTray() {
@@ -372,6 +381,7 @@ app.whenReady().then(() => {
   resetSessionStats()
   createWindow()
   createTray()
+  ensureAutostartPath()
   startServer()
   if (IS_MANUAL_LAUNCH) {
     mainWindow.once('ready-to-show', () => {

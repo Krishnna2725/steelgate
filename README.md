@@ -48,15 +48,15 @@ SteelGate 是给 Claude Code 和 Codex 用户整的本地桌面小玩具。
 
 ## 下载与安装
 
-去 [Releases](../../releases) 下载最新 Windows 安装包。
+去 [Releases](../../releases) 下载最新 Windows 压缩包（`SteelGate-<version>-win-x64.zip`）。
 
-1. 双击安装。
+1. 解压到任意目录，双击 `SteelGate.exe` 启动。
 2. 首次启动 SteelGate，它会自动安装 Claude Code 和 Codex Hook。
 3. 重启已经打开的 Claude Code / Codex 会话。
 4. Codex 首次使用时，可能需要在 `/hooks` 中信任 Hook。
 5. 写一段 60 字以上的 prompt，按回车，听响。
 
-安装包没有花钱买代码签名，Windows 可能会弹出“未知发布者”或 SmartScreen 提示。心里没底就先看源码、自己构建，别硬点，我们不劝人裸装。
+程序没有花钱买代码签名，Windows 可能会弹出”未知发布者”或 SmartScreen 提示。心里没底就先看源码、自己构建，别硬点，我们不劝人裸装。
 
 ## 它平时怎么活着？
 
@@ -74,7 +74,7 @@ SteelGate **不需要开机自启，也不会没事一直蹲在后台吃灰**。
 
 想让它开机就位，也可以右键系统托盘里的钢门图标，勾上 `开机自动启动`。不想让它开机蹲点，再取消勾选即可，默认是关闭的。
 
-如果今天不想叠了，点托盘里的 `退出并暂停自动唤醒`。这次是认真关门：后面的 prompt 不会再把 HUD 叫醒。要恢复，就从 Windows 开始菜单或桌面快捷方式手动打开 SteelGate；手动启动一次后，Hook 自动唤醒也会恢复。
+如果今天不想叠了，点托盘里的 `退出并暂停自动唤醒`。这次是认真关门：后面的 prompt 不会再把 HUD 叫醒。要恢复，就重新双击 `SteelGate.exe`；手动启动一次后，Hook 自动唤醒也会恢复。
 
 手动打开同样适用于“关闭开机自启、需要时再开”的用法。双击启动后 HUD 会直接露个脸，不会让你怀疑自己到底点没点着。
 
@@ -96,17 +96,13 @@ npm start
 npm test
 ```
 
-构建安装包：
+构建压缩包：
 
 ```powershell
-npm run build
+npm run build:dir
 ```
 
-产物在：
-
-```text
-release-final/SteelGate-<version>-x64-Setup.exe
-```
+产物目录在 `release-final/win-unpacked/`，把整个文件夹压缩成 zip 即可分发。
 
 ## 配置
 
